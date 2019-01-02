@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t sripathyk/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run sripathyk/react-test npm run test -- --coverage
+
+after_install:
+  - docker build -t sripathyk/multi-client ./client
+  - docker build -t sripathyk/multi-nginx ./nginx
+  - docker build -t sripathyk/multi-server ./server
+  - docker build -t sripathyk/multi-worker ./worker
+  # Login to Docker hub CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push images to Docker HUB
+  - docker push sripathyk/multi-client
+  - docker push sripathyk/multi-nginx
+  - docker push sripathyk/multi-server
+  - docker push sripathyk/multi-worker
+
